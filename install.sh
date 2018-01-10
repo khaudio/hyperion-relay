@@ -1,8 +1,10 @@
 #!/bin/sh
 
+apt update &&
+apt install python3-rpi.gpio pyserial
 
 ./install_hyperion.sh
 service hyperion stop
-#case 'on or off'
-cp ./hyperion.config.json_on /etc/hyperion.config.json
-#cp ./hyperion.config.json_off /etc/hyperion.config.json
+
+cp ./default_on /etc/hyperion.config.json
+service hyperion start

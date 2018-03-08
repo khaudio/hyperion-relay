@@ -12,16 +12,22 @@ service hyperion stop
 
 cp ./hyperion.config.json /etc/hyperion/
 
-chmod +x ./hyperion-relay
-cp ./hyperion-relay /etc/hyperion/
+cp ./hyperion_relay.py /etc/hyperion/
+cp ./relay_off.py /etc/hyperion/
+cp ./relay_on.py /etc/hyperion/
+chown pi:pi /etc/hyperion/*
+chmod +x /etc/hyperion/*.py
 
-cat >> /etc/systemd/system/hyperion-relay.service << EOF
+cat > /etc/systemd/system/hyperion-relay.service << EOF
 [Unit]
 Description=hyperion-relay
 
 [Service]
-ExecStart=/etc/hyperion/hyperion-relay.py
-StandardOutput=tty
+User=pi
+Type=simple
+ExecStart=/usr/bin/python3 /etc/hyperion/hyperion_relay.py
+ExecStop=/usr/bin/python3 /etc/hyperion/relay_off.py
+StandardOutput=syslog
 StandardError=syslog
 
 [Install]

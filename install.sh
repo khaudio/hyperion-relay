@@ -3,8 +3,9 @@
 apt update
 apt install python3-rpi.gpio pyserial
 
-curl -k -L --output install_hyperion.sh --get https://raw.githubusercontent.com/hyperion-project/hyperion/master/bin/install_hyperion.sh
+git clone https://github.com/arun11299/cpp-subprocess.git
 
+curl -k -L --output install_hyperion.sh --get https://raw.githubusercontent.com/hyperion-project/hyperion/master/bin/install_hyperion.sh
 chmod +x install_hyperion.sh
 sh ./install_hyperion.sh
 

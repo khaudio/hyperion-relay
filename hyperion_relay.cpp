@@ -10,15 +10,14 @@ using namespace std;
 
 int main()
 {
-    int relay = 2;
+    const int relay = 2, ledStatus = 21, ledPower = 3;
+    const int pins[3] = {relay, ledStatus, ledPower}
     wiringPiSetupGpio();
-    pinMode(2, OUTPUT);
-    pinMode(21, OUTPUT);
-    pinMode(3, OUTPUT);
-
-    digitalWrite(21, 1);
-    digitalWrite(3, 1);
-    digitalWrite(2, 1); 
+    for (int i = 0; i < pins.size(); i++)
+    {
+        pinMode(pins[i], OUTPUT);
+        digitalWrite(pins[i], 1);
+    }
 
     string status, color;
     bool on, last;
@@ -31,13 +30,13 @@ int main()
         status = (static_cast < stringstream const & > (stringstream() << proc.stdout().rdbuf()).str());
 
         std::regex_search(status, val, h);
-        color = val[1];
+        color = &val[1];
         on = !color.empty();
 
 	if (on != last)
         {
             cout << "Lights " << ((on) ? "on" : "off") << endl;
-            digitalWrite(2, ((on) ? LOW : HIGH));
+            digitalWrite(2, ((on) ? 0 : 1));
         }
 
 	last = on;

@@ -35,20 +35,16 @@ def run():
     """
     Check hyperion for color information via a subprocess call, then
     activate the relay if data is found.
-
-    Pulling the relay pin low activates it, while pulling high deactivates it.
     """
-    on = False
+    last = None
 
     while True:
         status = Popen(['hyperion-remote', '-l'], stdout=PIPE).stdout.read().decode('utf-8')
-        signal = search('(?<=HEX\sValue"\s:\s\[\s").+(?="\s],)', status)
+        signal = bool(search('(?<=HEX\sValue"\s:\s\[\s").+(?="\s],)', status))
 
-        if signal and not on:
-            on = switch_relay(0) # Activate the relay
-
-        elif not signal and on:
-            on = switch_relay(1) # Deactivate the relay
+        if signal != last: # Only signal the relay if state has changed
+            switch_relay(signal)
+            last = signal
 
         sleep(.01) # Sleep briefly to lower CPU usage
 
@@ -56,10 +52,11 @@ def run():
 def switch_relay(state):
     """
     Switch the relay based on the input command, then return the changed state.
+    Pulling the relay pin low activates it, while pulling high deactivates it.
     """
-    GPIO.output(relayPin, state)
-    print('Lights {}'.format('off' if state else 'on'))
-    return not state
+    GPIO.output(relayPin, not state)
+    print('Lights {}'.format('on' if state else 'off'))
+    return state
 
 
 if __name__ == '__main__':

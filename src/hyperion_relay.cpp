@@ -10,36 +10,43 @@ using namespace std;
 
 int main()
 {
-    const int relay = 2, ledStatus = 21, ledPower = 3;
-    const int pins[3] = {relay, ledStatus, ledPower}
+    const int pins[3] = {2, 3, 21};
+    const int relay = pins[0], ledStatus = pins[1], ledPower = pins[2];
+    const std::regex hexVal("\"HEX Value\" : \\[ \"(.+)\"");
+    string status;
+    bool on, last;
+    std::smatch state;
+
     wiringPiSetupGpio();
-    for (int i = 0; i < pins.size(); i++)
+
+    // Set the pins as outputs
+    for (int i = 0; i < 3; i++)
     {
         pinMode(pins[i], OUTPUT);
         digitalWrite(pins[i], 1);
     }
 
-    string status, color;
-    bool on, last;
-    std::smatch val;
-    std::regex h("\"HEX Value\" : \\[ \"(.+)\"");
+    // Flash the status LED
+    for (int i = 2; i < 6; i++)
+    {
+        digitalWrite(ledStatus, (i % 2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
 
     while (true)
     {
         subprocess::popen proc("hyperion-remote", {"-l"});
         status = (static_cast < stringstream const & > (stringstream() << proc.stdout().rdbuf()).str());
-
-        std::regex_search(status, val, h);
-        color = &val[1];
-        on = !color.empty();
+        std::regex_search(status, state, hexVal);
+        on = !((string)(state[1])).empty();
 
 	if (on != last)
         {
             cout << "Lights " << ((on) ? "on" : "off") << endl;
-            digitalWrite(2, ((on) ? 0 : 1));
+            digitalWrite(relay, ((on) ? 0 : 1));
+            last = on;
         }
 
-	last = on;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     return 0;

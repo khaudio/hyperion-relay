@@ -4,7 +4,7 @@
 	{
 		"name"       : "Relay",
 		"type"       : "adalight",
-		"output"     : "/dev/ttyS0",
+		"output"     : "/etc/hyperion/hyperion_write",
 		"rate"     : 38400,
 		"delayAfterConnect"     : 1,
 		"colorOrder" : "rgb"

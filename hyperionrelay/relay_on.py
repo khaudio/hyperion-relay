@@ -8,4 +8,4 @@ from hyperion_relay import setup, switch_relay
 
 
 setup()
-switch_relay(0)
+switch_relay(True)

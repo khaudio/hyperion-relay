@@ -88,6 +88,11 @@ def run():
 
 
 def main():
+    """
+    Main function
+    Set up GPIO, blink the status LED, loop over serial messages until stopped,
+    then clean up serial connection and GPIO before exiting.
+    """
     setup()
     # Flash the status LED twice to verify that the script is running
     for state in (0, 1) * 2:

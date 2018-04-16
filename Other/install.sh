@@ -33,6 +33,7 @@ StandardError=syslog
 
 [Install]
 WantedBy=default.target
+After=hyperion.service
 EOF
 
 systemctl daemon-reload

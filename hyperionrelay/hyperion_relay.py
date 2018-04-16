@@ -2,7 +2,7 @@
 
 """
 Activate a relay breakout board when color data is sent to hyperion.
-This can be used to control incandescent lights or any non-LED device
+This can be used to control incandescent lights or any switchable device
 using hyperion.
 """
 
@@ -33,13 +33,10 @@ def setup():
 
 def read_serial():
     """
-    Read loopback serial data from hyperion and determine whether
-    color data is being sent.  Once the preamble is stripped from
-    the message, the last three bytes contain RGB color information.
-    If all three are zero, yield False.  If any of the three are
-    greater than zero, yield True to the calling function.
+    Continually read loopback serial data from hyperion and determine whether
+    color data is being sent.
     """
-    message, preamble = deque(maxlen=9), [b'A', b'd', b'a', b'\x00', b'\x00', b'U']
+    message = deque(maxlen=9)
     while True:
         try:
             data = ser.read()
@@ -47,19 +44,34 @@ def read_serial():
             pass
         else:
             message.append(data)
-            if len(message) is 9 and [message[i] for i in range(6)] == preamble:
-                payload = [message[i] for i in range(6, 9)]
-                if all(i == b'\x00' for i in payload):
-                    yield False
-                else:
-                    yield True
+            yield from decode(message)
         sleep(.001)
+
+
+def decode(message):
+    """
+    Decode the received serial message.
+    Once the preamble is stripped from the message, the last three
+    bytes contain RGB color information. If all three are zero,
+    yield False.  If any of the three are greater than zero,
+    yield True to the calling function.
+    """
+    preamble = [b'A', b'd', b'a', b'\x00', b'\x00', b'U']
+    if len(message) is 9 and [message[i] for i in range(6)] == preamble:
+        payload = [message[i] for i in range(6, 9)]
+        if all(i == b'\x00' for i in payload):
+            yield False
+        else:
+            yield True
 
 
 def switch_relay(state):
     """
-    Switch the relay based on the input command, then return the changed state.
-    Pulling the relay pin low activates it, while pulling high deactivates it.
+    Switch the relay based on the input command, then return
+    the changed state.  Pulling the relay pin low activates it,
+    while pulling high deactivates it.  Send logical values to
+    this function; i.e., low for off, high for on, then pass
+    'not state' to GPIO for correct behavior.
     """
     GPIO.output(relayPin, not state)
     print('Lights {}'.format('on' if state else 'off'))
@@ -70,11 +82,12 @@ def run():
     """Send received serial data to the relay when state changes"""
     last = None
     for signal in read_serial():
+        print(last)
         if signal != last:
             last = switch_relay(signal)
 
 
-if __name__ == '__main__':
+def main():
     setup()
     # Flash the status LED twice to verify that the script is running
     for state in (0, 1) * 2:
@@ -85,3 +98,7 @@ if __name__ == '__main__':
     finally:
         ser.close() # Close serial connection
         GPIO.cleanup() # Clean up GPIO
+
+
+if __name__ == '__main__':
+    main()

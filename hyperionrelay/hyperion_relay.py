@@ -7,11 +7,15 @@ using hyperion.
 """
 
 from collections import deque
+from datetime import datetime, time
 import RPi.GPIO as GPIO
 from serial import Serial, SerialException
+from subprocess import check_output
 from time import sleep
 
 
+# When True, default to the timer if not manually set
+useTimer = True
 # Assign GPIO BCM pins
 relayPin, ledPower, ledPin = 2, 21, 3
 # Assign virtual serial port set by hyperion-loopback systemd service
@@ -65,6 +69,28 @@ def decode(message):
             yield True
 
 
+def timer(start=(20, 30), end=(23, 59, 59)):
+    """
+    Set start and end times for the relay to activate.
+    The timer defaults to priority 500, so other devices with
+    a lower numeric priority value may override it.
+    """
+    startTime, endTime = time(*start), time(*end)
+    if startTime < datetime.time(datetime.now()) < endTime:
+        return True
+    else:
+        return False
+
+
+def hyperion_subprocess(on=False):
+    if on:
+        check_output(['hyperion-remote', '-p', '500', '-c', 'white'])
+        print('Timer activated')
+    else:
+        check_output(['hyperion-remote', '-p', '500', '--clear'])
+        print('Timer deactivated')
+
+
 def switch_relay(state):
     """
     Switch the relay based on the input command, then return
@@ -83,6 +109,10 @@ def run():
     last = None
     for signal in read_serial():
         print(last)
+        if useTimer:
+            timerState = timer()
+            if timerState != last and not last:
+                hyperion_subprocess(timerState)
         if signal != last:
             last = switch_relay(signal)
 

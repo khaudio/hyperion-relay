@@ -108,10 +108,9 @@ def run():
     """Send received serial data to the relay when state changes"""
     last = None
     for signal in read_serial():
-        print(last)
         if useTimer:
             timerState = timer()
-            if timerState != last and not last:
+            if (timerState and not signal) or (signal and not timerState):
                 hyperion_subprocess(timerState)
         if signal != last:
             last = switch_relay(signal)

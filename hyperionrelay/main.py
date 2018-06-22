@@ -69,7 +69,7 @@ def decode(message):
             yield True
 
 
-def timer(start=(20, 30), end=(23, 59, 59)):
+def timer(start=(19, 45), end=(23, 59, 59)):
     """
     Set start and end times for the relay to activate.
     The timer defaults to priority 500, so other devices with

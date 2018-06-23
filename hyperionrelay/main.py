@@ -16,6 +16,8 @@ from time import sleep
 
 # When True, default to the timer if not manually set
 useTimer = True
+# Timer start and end times in a tuple of (H, M, S)
+timerOn, timerOff = (19, 30), (23, 59, 59)
 # Assign GPIO BCM pins
 relayPin, ledPower, ledPin = 2, 21, 3
 # Assign virtual serial port set by hyperion-loopback systemd service
@@ -69,7 +71,7 @@ def decode(message):
             yield True
 
 
-def timer(start=(19, 45), end=(23, 59, 59)):
+def timer(start=timerOn, end=timerOff):
     """
     Set start and end times for the relay to activate.
     The timer defaults to priority 500, so other devices with

@@ -17,7 +17,7 @@ from time import sleep
 # When True, default to the timer if not manually set
 useTimer = True
 # Timer start and end times in a tuple of (H, M, S)
-timerOn, timerOff = (19, 30), (23, 59, 59)
+timerOn, timerOff = (18, 30), (23, 59, 59)
 # Assign GPIO BCM pins
 relayPin, ledPower, ledPin = 2, 21, 3
 # Assign virtual serial port set by hyperion-loopback systemd service
